@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OLX Authorization — Callback</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 560px;
+            width: 100%;
+            text-align: center;
+        }
+        .icon { font-size: 48px; margin-bottom: 16px; }
+        h1 { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+        .subtitle { color: #888; font-size: 14px; margin-bottom: 32px; }
+        .code-box {
+            background: #111;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 24px 0;
+            position: relative;
+        }
+        .code-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .code-value {
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            color: #4ade80;
+            word-break: break-all;
+            line-height: 1.5;
+            user-select: all;
+        }
+        .copy-btn {
+            background: #4ade80;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: background 0.15s;
+        }
+        .copy-btn:hover { background: #22c55e; }
+        .copy-btn.copied { background: #666; color: #fff; }
+        .instruction {
+            color: #888;
+            font-size: 13px;
+            margin-top: 24px;
+            line-height: 1.6;
+        }
+        .error-box {
+            background: #1c0a0a;
+            border: 1px solid #7f1d1d;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 24px 0;
+        }
+        .error-value { color: #f87171; font-weight: 500; }
+        .url-box {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 24px 0;
+        }
+        .url-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .url-value {
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 11px;
+            color: #94a3b8;
+            word-break: break-all;
+            line-height: 1.5;
+            user-select: all;
+        }
+    </style>
+</head>
+<body>
+    <div class="card" id="card">
+        <noscript>
+            <p>JavaScript is required to extract the authorization code from the URL.</p>
+            <p>Copy the full URL from your browser's address bar and paste it into the terminal.</p>
+        </noscript>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+        const error = params.get('error');
+        const card = document.getElementById('card');
+
+        if (error) {
+            card.innerHTML = `
+                <div class="icon">&#10060;</div>
+                <h1>Authorization Failed</h1>
+                <div class="error-box">
+                    <div class="error-value">${escapeHtml(error)}</div>
+                </div>
+                <p class="instruction">Close this tab and try <code>olx login</code> again.</p>
+            `;
+        } else if (code) {
+            const fullUrl = window.location.href;
+            card.innerHTML = `
+                <div class="icon">&#9989;</div>
+                <h1>Authorization Complete</h1>
+                <p class="subtitle">Copy the URL below and paste it into your terminal</p>
+                <div class="url-box">
+                    <div class="url-label">Callback URL</div>
+                    <div class="url-value" id="url-value">${escapeHtml(fullUrl)}</div>
+                </div>
+                <button class="copy-btn" id="copy-btn" onclick="copyUrl()">Copy URL to Clipboard</button>
+                <p class="instruction">
+                    Paste this into the terminal where <code>olx login</code> is waiting,<br>
+                    then press Enter.
+                </p>
+            `;
+        } else {
+            card.innerHTML = `
+                <div class="icon">&#10067;</div>
+                <h1>No Authorization Code</h1>
+                <p class="subtitle">This page is the OAuth callback for the OLX CLI tool.</p>
+                <p class="instruction">
+                    Run <code>olx login</code> in your terminal to start the authorization flow.<br>
+                    You will be redirected here automatically after authorizing with OLX.
+                </p>
+            `;
+        }
+
+        function copyUrl() {
+            const url = window.location.href;
+            navigator.clipboard.writeText(url).then(() => {
+                const btn = document.getElementById('copy-btn');
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy URL to Clipboard';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

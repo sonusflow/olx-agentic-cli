@@ -1,0 +1,15 @@
+name = "olx-oauth-callback"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# By default, deploys to: https://olx-oauth-callback.<your-subdomain>.workers.dev
+# No custom domain needed — the free workers.dev URL works as an OLX callback URI.
+#
+# To use a custom domain instead, uncomment and configure:
+# [[routes]]
+# pattern = "yourdomain.com/olx-callback*"
+# zone_id = "your-cloudflare-zone-id"
+
+[[rules]]
+type = "Text"
+globs = ["**/*.html"]
